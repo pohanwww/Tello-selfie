@@ -8,6 +8,8 @@ import cv2
 import numpy
 import time
 import _thread
+import face_recognition
+
 
 cascPath = r"D:\User\Documents\Python\Tello_selfie\FaceDetect-master\haarcascade_frontalface_default.xml"
 
@@ -20,7 +22,8 @@ def handler(event, sender, data, **args):
 	# 	print(data)
 
 def control(drone, vertical_bias, horizon_bias, detected_face, auto_mode):
-	print("auto_mode:",detected_face)
+	print("deteced_face:",detected_face, auto_mode, vertical_bias)
+
 	if auto_mode == False:
 		if (keyboard.is_pressed('n')):
 			drone.takeoff()
@@ -68,11 +71,6 @@ def control(drone, vertical_bias, horizon_bias, detected_face, auto_mode):
 		elif (keyboard.is_pressed('z')):
 			drone.frontflip()
 			sleep(1)
-		elif (keyboard.is_pressed('m')):	
-			drone.down(50)
-			sleep(5)
-			drone.land()
-			sleep(5)
 		
 	elif auto_mode == True: #480,360
 		if detected_face == True:			
@@ -96,6 +94,12 @@ def control(drone, vertical_bias, horizon_bias, detected_face, auto_mode):
 				sleep(0.5)	
 				drone.counter_clockwise(0)
 				sleep(0.5)
+
+	if (keyboard.is_pressed('m')):	
+			drone.down(50)
+			sleep(5)
+			drone.land()
+			sleep(5)
 		
 def start():
 	drone = tellopy.Tello()
@@ -125,6 +129,8 @@ def start():
 			if 0 < frame_skip:
 				frame_skip = frame_skip - 1
 				continue
+			if (keyboard.is_pressed('p')):
+				break
 			if (keyboard.is_pressed('c')):
 				auto_mode = True
 				print("c")
@@ -153,14 +159,15 @@ def start():
 						y = face_y + face_h/2
 						horizon_bias_ = x - 480
 						vertical_bias_ = y - 360
-						print("horizon_bias",horizon_bias)
-						print("vertical_bias",vertical_bias)
+						print("horizon_bias",horizon_bias_)
+						print("vertical_bias",vertical_bias_)
 
-						if vertical_bias_ > 30 and vertical_bias_ < -30:
+						if vertical_bias_ > 30 or vertical_bias_ < -30:
 							vertical_bias = vertical_bias_
+							print("jiji")
 						else:
 							vertical_bias = 0
-						if horizon_bias_ > 60 and horizon_bias_ < -60:
+						if horizon_bias_ > 60 or horizon_bias_ < -60:
 							horizon_bias = horizon_bias_
 						else:
 							horizon_bias = 0
@@ -169,12 +176,12 @@ def start():
 								pic_stable = True
 								pic_time = time.time()
 							elif pic_stable == True:
-								if time.time() - pic_time > 3:
+								if time.time() - pic_time > 1:
 									pic_path = 'pictures/' + str(time.time()) + '.jpg'
 									cv2.imwrite(pic_path, image)
 									pic_count += 1
 									pic_stable = False
-									if pic_count == 3:
+									if pic_count == 1:
 										auto_mode = False
 								else:
 									continue
@@ -216,8 +223,15 @@ def start():
 			if cv2.waitKey(1) == 27:
 				break
 	finally:
+		drone.down(50)
+		sleep(5)
+		drone.land()
+		sleep(5)
 		drone.quit()
 		cv2.destroyAllWindows()
+
+		face_recognition.start_face()
+		
 if __name__ == '__main__':
 	start()
 	
