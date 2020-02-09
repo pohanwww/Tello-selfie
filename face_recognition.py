@@ -14,9 +14,9 @@ predictor_path = "shape_predictor_68_face_landmarks.dat"
 face_rec_model_path = "dlib_face_recognition_resnet_model_v1.dat"
 
 # 比對人臉圖片資料夾名稱
-faces_folder_path = "./rec"
+faces_folder_path = r"./rec"
 
-pictures_path = r"D:\User\Documents\Python\Tello_selfie\pictures"
+pictures_path = r"./pictures"
 # 需要辨識的人臉圖片名稱
 def face(all_file_list):
     # 載入人臉檢測器
